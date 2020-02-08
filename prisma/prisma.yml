@@ -1,4 +1,4 @@
-endpoint: ${env:PRISMA_ENDPOINT}
-# endpoint: 
+endpoint: ${env:PRISMA_ENDPOINT} 
+# endpoint: To deploy, prisma deploy -e ../config/dev.env or ../config/prod.env for production
 datamodel: datamodel.prisma
-secret: thisismysecretstuff
+secret: ${env:PRISMA_SECRET}
