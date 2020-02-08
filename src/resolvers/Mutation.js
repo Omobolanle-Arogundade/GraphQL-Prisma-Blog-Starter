@@ -14,11 +14,11 @@ const Mutation = {
     if (emailExists) {
       throw new Error("Email Taken");
     } else {
-      const hashPassword = await hashPassword(password)
+      const hashedPassword = await hashPassword(password)
       const user = await prisma.mutation.createUser({
         data: {
           ...args.data,
-          password: hashPassword
+          password: hashedPassword
         }
       });
 
