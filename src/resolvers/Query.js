@@ -1,19 +1,120 @@
-const Query = {
-    me: (parent, args, { db }, info) => db.users[0],
+import getUserId from "../utils/getUserId";
 
-    posts: (_, {query}, {db}, info) => {
-        if(!query) return db.posts
-        else return db.posts.filter(post => {
-            return post.title.toLowerCase().includes(query.toLowerCase()) || post.body.toLowerCase().includes(query.toLowerCase()) 
-        })
-    },
-    users: (_, {query}, { db }) => {
-        if (!query) {
-            return db.users
+const Query = {
+  me: (parent, args, { prisma, request }, info) => {
+    const userId = getUserId(request);
+
+    return prisma.query.user({
+      where: {
+        id: userId
+      }
+    });
+  },
+
+  posts: (_, { query, skip, first, after, orderBy }, { prisma, request }, info) => {
+    const opArgs = {
+      where: {
+        published: true
+      },
+      skip,
+      first,
+      after,
+      orderBy
+    };
+    if (query) {
+      opArgs.where = {
+        OR: [
+          {
+            title_contains: query
+          },
+          {
+            body_contains: query
+          }
+        ]
+      };
+    }
+
+    return prisma.query.posts(opArgs, info);
+  },
+
+  myPosts: (parent, { query, skip, first, after, orderBy }, { prisma, request }, info) => {
+    const userId = getUserId(request);
+    const opArg = {
+      where: {
+        author: {
+          id: userId
         }
-        return db.users.filter(user => user.name.toLowerCase().includes(query.toLowerCase()))
-    },
-    comments: (parent, args, {db}, info) => db.comments
-}
+      },
+      skip,
+      first,
+      after,
+      orderBy
+    };
+
+    if (query) {
+      opArg.where.OR = [
+        {
+          title_contains: query
+        },
+        {
+          body_contains: query
+        }
+      ];
+    }
+
+    return prisma.query.posts(opArg, info);
+  },
+
+  post: async (parent, { id }, { prisma, request }, info) => {
+    const userId = getUserId(request, false);
+
+    const posts = await prisma.query.posts(
+      {
+        where: {
+          id,
+          OR: [
+            {
+              published: true
+            },
+            {
+              author: {
+                id: userId
+              }
+            }
+          ]
+        }
+      },
+      info
+    );
+
+    if (posts.length === 0) {
+      throw new Error("Post not found!!");
+    }
+
+    return posts[0];
+  },
+
+  users: (_, { query, first, skip, after, orderBy }, { prisma }, info) => {
+    const opArgs = {
+      first,
+      skip,
+      after,
+      orderBy
+    };
+    if (query) {
+      opArgs.where = {
+        name_contains: query
+      };
+    }
+    return prisma.query.users(opArgs, info);
+  },
+
+  comments: (parent, {first, skip, after, orderBy}, { prisma }, info) => {
+    const opArgs = {
+      first, skip, after, orderBy
+    }
+    return prisma.query.comments(opArgs, info);
+  }
+};
 
 export default Query;

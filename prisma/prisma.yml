@@ -1,2 +1,4 @@
-endpoint: http://192.168.99.100:4466
+endpoint: ${env:PRISMA_ENDPOINT}
+# endpoint: 
 datamodel: datamodel.prisma
+secret: thisismysecretstuff

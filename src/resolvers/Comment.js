@@ -1,11 +1,25 @@
 const Comment = {
-    author: (parent, args, {db}, info) => {
-        return db.users.find(user => user.id === parent.author)
-    },
+  // author: (parent, args, { prisma }, info) => {
+  //   return prisma.query.users(
+  //     { 
+  //       where: {
+  //         id: parent.author
+  //       }
+  //     },
+  //     info
+  //   )
+  // },
 
-    post: (parent, args, {db}, info) => {
-        return db.posts.find(post => post.id === parent.post)
-    }
+  // post: (parent, args, { prisma }, info) => {
+  //   return prisma.query.posts(
+  //     {
+  //       where: {
+  //         id: parent.posts
+  //       }
+  //     },
+  //     info
+  //   )
+  // }
 };
 
 export default Comment;
